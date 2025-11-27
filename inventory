@@ -1,3 +1,5 @@
 [webservers]
 123.56.174.148 ansible_user=root ansible_ssh_private_key_file=/home/cwsun/.ssh/aliyun-cwsun-2.pem
 39.107.99.149 ansible_user=root ansible_ssh_private_key_file=/home/cwsun/.ssh/aliyun-cwsun-2.pem
+[node_exporter_hosts] # IP address of alicloud to install node_exporter
+
