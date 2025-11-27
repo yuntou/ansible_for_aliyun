@@ -1,0 +1,71 @@
+# playbook.yml
+---
+- name: Install and run Node Exporter on target hosts
+  hosts: node_exporter_hosts
+  become: yes  # 使用 sudo 权限
+  vars:
+    node_exporter_version: "1.10.2"  # 请根据 https://github.com/prometheus/node_exporter/releases 选择最新稳定版
+    node_exporter_port: 9100
+    node_exporter_user: "node_exporter"
+    install_dir: "/opt/node_exporter"
+    download_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+
+  tasks:
+    - name: Create node_exporter system user
+      user:
+        name: "{{ node_exporter_user }}"
+        system: yes
+        shell: /sbin/nologin
+        create_home: no
+
+    - name: Install required packages (wget, tar)
+      package:
+        name:
+          - wget
+          - tar
+        state: present
+
+    - name: Download node_exporter archive
+      get_url:
+        url: "{{ download_url }}"
+        dest: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+        mode: '0644'
+
+    - name: Extract node_exporter archive
+      unarchive:
+        src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+        dest: /tmp
+        remote_src: yes
+
+    - name: Copy node_exporter binary to {{ install_dir }}
+      copy:
+        src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+        dest: "{{ install_dir }}/node_exporter"
+        remote_src: yes
+        owner: "{{ node_exporter_user }}"
+        group: "{{ node_exporter_user }}"
+        mode: '0755'
+      notify: restart node_exporter
+
+    - name: Create systemd service file
+      template:
+        src: node_exporter.service.j2
+        dest: /etc/systemd/system/node_exporter.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart node_exporter
+
+    - name: Reload systemd and enable node_exporter service
+      systemd:
+        daemon_reload: yes
+        enabled: yes
+        name: node_exporter
+        state: started
+
+  handlers:
+    - name: restart node_exporter
+      systemd:
+        name: node_exporter
+        state: restarted
+        daemon_reload: yes
