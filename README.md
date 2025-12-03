@@ -1,4 +1,4 @@
-*** ansible_for_aliyun ***
+***ansible_for_aliyun
 本项目记录如何使用ansible在阿里云上安装node exporter,nginx等操作。
 ## 第一步：在inventory文件中添加相应的ECS实例IP地址
 ## 第二步：检查yml文件，在文件中写入远程主机名，要执行的操作等信息
