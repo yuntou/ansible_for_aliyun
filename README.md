@@ -7,7 +7,7 @@
 
 ## 第三步：在ansible控制主机（linux系统）上运行这两条命令：
 、、、
-
+// 配置ssh
 $ ssh-agent bash
 
 $ ssh-add ~/.ssh/id_rsa  //将ssh private key文件加入ssh agent，这样ansible就可以使用ssh key来登陆远程主机
